@@ -1,0 +1,13 @@
+# tests/data/login_cases.yaml
+valid:
+  - username: "admin"
+    password: "correct_pwd"
+    expected_status: 200
+
+invalid:
+  - username: "admin"
+    password: "wrong_pwd"
+    expected_status: 401
+  - username: ""
+    password: "any"
+    expected_status: 400

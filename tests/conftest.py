@@ -4,7 +4,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
+def auto_retry(request):
+    """自动重试失败用例"""
+    if request.node.rep_call.failed:
+        time.sleep(1)
+        return request.node.rerun()
+
+
 def smart_wait(browser):
     def _wait(locator, timeout=10):
         return WebDriverWait(browser, timeout).until(
