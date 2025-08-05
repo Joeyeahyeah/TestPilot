@@ -1,10 +1,12 @@
 from ..api_client import APIClient
 from .auth_client import AuthClient  # 需要依赖认证
 import requests
+
 """
 用户管理相关接口（增删改查）的业务封装
 create_user(), get_user(), update_user()
 """
+
 class UserClient(APIClient):
     # 用户管理端点
     USER_ENDPOINT = "/users"
