@@ -19,7 +19,7 @@
 ```bash
 # 必装工具清单
 Python 3.8+  
-pip install pytest requests selenium allure-pytest pytest-html  
+pip install pytest/requests/selenium/allure-pytest/pytest-html/  
 Chrome浏览器 + 对应版本ChromeDriver  
 IDE：VSCode或PyCharm
 ```
