@@ -18,8 +18,12 @@ class AuthClient(APIClient):
     def __init__(self, base_url: str):
         super().__init__(base_url)
         # 认证专用端点
-        self.LOGIN_ENDPOINT = "/auth/login"
-        self.LOGOUT_ENDPOINT = "/auth/logout"
+        # self.LOGIN_ENDPOINT = "/auth/login"
+        # self.LOGOUT_ENDPOINT = "/auth/logout"
+
+        # ReqRes
+        self.LOGIN_ENDPOINT = "login"
+        self.LOGOUT_ENDPOINT = "logout"
         self.logger = logging.getLogger(__name__)
 
     def _handle_error(self, e: requests.HTTPError) -> Dict[str, Any]:
@@ -47,18 +51,16 @@ class AuthClient(APIClient):
         try:
             resp = self.post(
                 self.LOGIN_ENDPOINT,
-                json={"username": username, "password": password}
+                json={"email": username, "password": password}
             )
-            token = resp["access_token"]
-
+            token = resp["data"]["token"]
             # 关键：存储token到session
             self.session.headers["Authorization"] = f"Bearer {token}"
 
             return {
-                "status_code": resp.status_code,
-                "token": token,
-                "expires_in": resp["expires_in"]
-
+                "status_code": resp["status_code"],
+                "token": token
+                # "expires_in": resp["expires_in"]
             }
         except requests.HTTPError as e:
             return self._handle_error(e)
@@ -75,7 +77,7 @@ class AuthClient(APIClient):
             resp = self.post(self.LOGOUT_ENDPOINT)
             self.session.headers.pop("Authorization", None)
             # self.post(self.LOGOUT_ENDPOINT)
-            return {"status_code": resp.status_code}
+            return {"status_code": resp["status_code"]}
         except requests.HTTPError as e:
             return self._handle_error(e)
             # return {

@@ -52,8 +52,7 @@ IDE：VSCode或PyCharm
 3. 编写数据驱动测试用例 (`test_login.py`)：
    ```python
    import pytest
-   from apiclient import APIClient
-   # from .api_client import APIClient
+   from src.api import APIClient
    
    @pytest.fixture(scope="module")
    def api():
