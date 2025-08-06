@@ -15,6 +15,12 @@ class LoginSuccessResponse(TypedDict):
 
 
 class AuthClient(APIClient):
+    # 不再需要专门的登录方法，因为使用API key认证
+    def check_health(self) -> bool:
+        """检查API是否可用"""
+        resp = self.get("users/1")
+        return resp["status_code"] == 200
+
     def __init__(self, base_url: str):
         super().__init__(base_url)
         # 认证专用端点
@@ -53,7 +59,8 @@ class AuthClient(APIClient):
                 self.LOGIN_ENDPOINT,
                 json={"email": username, "password": password}
             )
-            token = resp["data"]["token"]
+            # token = resp["data"]["token"]
+            token = resp["data"].get("token") or resp["data"].get("id") # Reqres
             # 关键：存储token到session
             self.session.headers["Authorization"] = f"Bearer {token}"
 
@@ -61,6 +68,14 @@ class AuthClient(APIClient):
                 "status_code": resp["status_code"],
                 "token": token
                 # "expires_in": resp["expires_in"]
+            }
+        except KeyError as e:
+            # 添加更详细的错误信息
+            self.logger.error(f"Token key missing in response: {resp['data']}")
+            return {
+                "status_code": 500,
+                "error": f"Token key missing: {str(e)}",
+                "detail": resp["data"]
             }
         except requests.HTTPError as e:
             return self._handle_error(e)

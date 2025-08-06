@@ -9,7 +9,7 @@ create_user(), get_user(), update_user()
 
 class UserClient(APIClient):
     # 用户管理端点
-    USER_ENDPOINT = "/users"
+    USER_ENDPOINT = "users"
 
     def __init__(self, base_url: str, auth_client: AuthClient):
         super().__init__(base_url)

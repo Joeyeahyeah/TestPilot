@@ -1,3 +1,5 @@
+import os
+import sys
 import pytest
 import time
 from selenium.webdriver.support.ui import WebDriverWait
@@ -49,22 +51,46 @@ def pytest_terminal_summary(terminalreporter):
    # 新代码：通过session获取开始时间
    # duration = time.time() - terminalreporter.config.session._sessionstarttime
    # 正确获取测试开始时间的方式（兼容新版本pytest）
-   session = terminalreporter._session
-   duration = time.time() - session._starttime  # 使用session的_starttime属性
-   # 统计各种状态的用例数量
-   passed = len(terminalreporter.stats.get('passed', []))
-   failed = len(terminalreporter.stats.get('failed', []))
-   skipped = len(terminalreporter.stats.get('skipped', []))
-   total = passed + failed + skipped
+   # session = terminalreporter._session
+   # duration = time.time() - session._starttime  # 使用session的_starttime属性
+   # 兼容不同 pytest 版本获取测试时长
+   try:
+       # 1. 确保 reports 目录存在
+       reports_dir = os.path.join(os.path.dirname(__file__), "..", "reports")
+       os.makedirs(reports_dir, exist_ok=True)
 
-   with open("metrics.txt", "a") as f:
-       f.write(f"test_duration {duration:.2f}s\n")
-       f.write(f"test_total {total}\n")
-       f.write(f"test_pass {passed}\n")
-       f.write(f"test_fail {failed}\n")
-       f.write(f"test_skip {skipped}\n")
-       f.write(f"test_pass_rate {passed/total*100:.2f}\n" if total > 0 else "test_pass_rate 0%\n")
-       f.write("------------------------------------------------------------------------------\n")
+       # 2. 构建完整文件路径
+       report_path = os.path.join(reports_dir, "metrics.txt")
+
+       # 3. 获取测试数据（兼容不同pytest版本）
+       session = getattr(terminalreporter, "_session", None)
+       duration = (time.time() - session._starttime) if hasattr(session, "_starttime") else 0
+
+       # 统计各种状态的用例数量
+       stats = terminalreporter.stats
+       passed = len(terminalreporter.stats.get('passed', []))
+       failed = len(terminalreporter.stats.get('failed', []))
+       skipped = len(terminalreporter.stats.get('skipped', []))
+       total = passed + failed + skipped
+
+       # 4. 写入报告文件（使用绝对路径）
+       try:
+           with open(report_path, "a", encoding="utf-8") as f:
+               f.write(f"test_duration {duration:.2f}s\n")
+               f.write(f"test_total {total}\n")
+               f.write(f"test_pass {passed}\n")
+               f.write(f"test_fail {failed}\n")
+               f.write(f"test_skip {skipped}\n")
+               if total > 0:
+                   f.write(f"test_pass_rate {passed / total * 100:.2f}%\n")
+               else:
+                   f.write("test_pass_rate 0%\n")
+               f.write("-" * 50 + "\n")
+       except IOError as e:
+           print(f"\n 写入报告出错：{str(e)}")
+   except Exception as e:
+        print(f"\n⚠️ 生成测试报告时出错: {str(e)}", file=sys.stderr)
+        f.write("------------------------------------------------------------------------------\n")
 
 # API测试相关Fixture
 @pytest.fixture(scope="session")
@@ -78,13 +104,25 @@ def auth_client(api_base_url):
     client = AuthClient(api_base_url)
     # login_response = client.login(username="username", password="password")
     # ReqRes
-    login_response = client.login(username="eve.holt@reqres.in", password="cityslicka")
-    assert  login_response["status_code"] == 200, "登录失败"
-    assert "token" in login_response, "登录响应中未包含token"
-
+    assert client.check_health(), "API服务不可用"
+    # Reqres old
+    # login_response = client.login(
+    #     username="eve.holt@reqres.in",
+    #     password="cityslicka"
+    # )
+    # assert  login_response["status_code"] == 200, "登录失败"
+    # assert "token" in login_response, "登录响应中未包含token"
     yield client # 提供给测试用例使用
+    # 登出可能不需要，因为 Reqres 没有真正的会话
+    # client.logout()
 
-    client.logout()
+@pytest.fixture
+def test_user_data():
+    timestamp = int(time.time())
+    return {
+        "name": f"Test User {timestamp}",
+        "job": f"Developer {timestamp}"
+    }
 
 @pytest.fixture
 def user_client(api_base_url, auth_client):

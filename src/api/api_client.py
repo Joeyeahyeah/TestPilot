@@ -11,7 +11,11 @@ class APIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip('/')
         self.session = requests.session()  # 复用TCP连接
-        # ReqRes 暂移除
+        # 添加 Reqres API key 头
+        self.session.headers.update({
+            "x-api-key": "reqres-free-v1",
+            "Content-Type": "application/json"
+        })
         # self.session.headers.update({"Content-Type": "application/json"})
 
     def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str,Any]:
@@ -20,17 +24,17 @@ class APIClient:
         try:
             response = self.session.request(method, url, **kwargs)
             response.raise_for_status()  # 自动抛出HTTP错误
-        except requests.HTTPError as e:
             return {
-                "status_code": e.response.status_code,
-                "data": e.response.json(),
-                "headers": e.response.headers
-            }
-
-        return {
                 "status_code": response.status_code,
                 "data": response.json(),
                 "headers": response.headers
+            }
+        except requests.HTTPError as e:
+            return {
+                "status_code": e.response.status_code,
+                # "data": e.response.json(),
+                # "headers": e.response.headers
+                "error": e.response.text
             }
 
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:

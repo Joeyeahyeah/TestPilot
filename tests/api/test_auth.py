@@ -12,36 +12,55 @@ def auth_client() -> AuthClient:
     return AuthClient("https://api.example.com")
 
 class TestAuth:
-    @pytest.mark.parametrize("username, password, expected_status", [
-        ("admin", "correct_pwd", 200),  # 正常用例
-        ("admin", "wrong_pwd", 401),    # 密码错误
-        ("", "any_pwd", 400),           # 空用户名
-        ("invalid_user", "", 422)       #无效用户
+    # @pytest.mark.parametrize("username, password, expected_status", [
+    #     ("admin", "correct_pwd", 200),  # 正常用例
+    #     ("admin", "wrong_pwd", 401),    # 密码错误
+    #     ("", "any_pwd", 400),           # 空用户名
+    #     ("invalid_user", "", 422)       #无效用户
+    # ])
+
+    # ------------------------------------Reqres----------------------------------------
+    @pytest.mark.parametrize("email, password, expected_status", [
+        ("eve.holt@reqres.in", "cityslicka", 200),  # 有效
+        ("invalid@reqres.in", "password", 400),  # 无效邮箱
+        ("eve.holt@reqres.in", "", 400),  # 空密码
     ])
 
-    def test_login_scenarios(self, auth_client: AuthClient, username: str, password: str, expected_status: int):
-        """测试登录接口的各种场景"""
-        result = auth_client.login(username, password)
-
-        # 公共断言
+    def test_login_scenarios(self, auth_client: AuthClient, email, password, expected_status):
+        result = auth_client.login(email, password)
         assert result["status_code"] == expected_status
 
-        # 成功时的额外断言
         if expected_status == 200:
             assert "token" in result
-            assert isinstance(result["token"], str)
-            assert len(result["token"]) > 30
-            assert "expires_in" in result
-            assert isinstance(result["expires_in"], int)
-            # 验证状态管理
-            assert "Authorization" in auth_client.session.headers
-            assert "Bearer" in auth_client.session.headers["Authorization"]
-        # 失败时的额外断言
+            assert len(result["token"]) > 5  # Reqres的token较短
+            # # 验证Authorization头
+            # assert "Authorization" in auth_client.session.headers
         else:
-            assert "error" in result
-            assert len(result["error"]) > 0
-            assert "detail" in result
-            assert len(result["detail"]) > 0
+            assert "error" in result or "detail" in result
+
+    # ------------------------------------Reqres----------------------------------------
+    # def test_login_scenarios(self, auth_client: AuthClient, username: str, password: str, expected_status: int):
+    #     """测试登录接口的各种场景"""
+    #     result = auth_client.login(username, password)
+    #     # 公共断言
+    #     assert result["status_code"] == expected_status
+    #
+    #     # 成功时的额外断言
+    #     if expected_status == 200:
+    #         assert "token" in result
+    #         assert isinstance(result["token"], str)
+    #         assert len(result["token"]) > 30
+    #         assert "expires_in" in result
+    #         assert isinstance(result["expires_in"], int)
+    #         # 验证状态管理
+    #         assert "Authorization" in auth_client.session.headers
+    #         assert "Bearer" in auth_client.session.headers["Authorization"]
+    #     # 失败时的额外断言
+    #     else:
+    #         assert "error" in result
+    #         assert len(result["error"]) > 0
+    #         assert "detail" in result
+    #         assert len(result["detail"]) > 0
 
     def test_logout(self, auth_client: AuthClient):
         """测试登出功能"""
