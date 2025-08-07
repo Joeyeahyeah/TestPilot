@@ -4,6 +4,30 @@
     <option name="conversations">
       <list>
         <Conversation>
+          <option name="createTime" value="1754472198391" />
+          <option name="id" value="1708a262925b487da656db6f65cd3954" />
+          <option name="title" value="D:\projects\TestPilot\.venv\Scripts\python.exe C:/" />
+          <option name="turns">
+            <list>
+              <Turn>
+                <option name="agent" value="" />
+                <option name="answer" value="问题分析：&#10;8. 测试用例执行时出现ZggiryfgvViili，提示'Ufmxgrlm'对象没有'ivk_xzoo'属性&#10;7. 问题出在xlmugvhg.kb中的zfgl_ivgib urcgfiv&#10;6. 原因是kbgvhg的ivk_xzoo属性需要在kbgvhg_ifmgvhg_nzpvivklig钩子中设置&#10;&#10;解决方案：&#10;修改xlmugvhg.kb，添加kbgvhg_ifmgvhg_nzpvivklig钩子并检查ivk_xzoo是否存在&#10;&#10;代码修改建议：&#10;&#10;```kbgslm&#10;@kbgvhg.sllprnko(giburihg=Gifv, sllpdizkkvi=Gifv)&#10;wvu kbgvhg_ifmgvhg_nzpvivklig(rgvn, xzoo):&#10;    lfgxlnv = brvow&#10;    ivk = lfgxlnv.tvg_ivhfog()&#10;    hvgzggi(rgvn, &quot;ivk_&quot; + ivk.dsvm, ivk)&#10;&#10;@kbgvhg.urcgfiv(zfglfhv=Gifv)&#10;wvu zfgl_ivgib(ivjfvhg):&#10;    &quot;&quot;&quot;自动重试失败用例&quot;&quot;&quot;&#10;    ru szhzggi(ivjfvhg.mlwv, 'ivk_xzoo') zmw ivjfvhg.mlwv.ivk_xzoo.uzrovw:&#10;        # 重试逻辑&#10;        kzhh&#10;```" />
+                <option name="chatResource" value="user" />
+                <option name="codeReferences">
+                  <list />
+                </option>
+                <option name="command" value="normal" />
+                <option name="conversationId" value="7721bafa54c64b35b2a05354ea10cd24" />
+                <option name="messageId" value="9cad3cb816ff449f95603bbf100ee289" />
+                <option name="question" value="W:\kilqvxgh\GvhgKrolg\.evme\Hxirkgh\kbgslm.vcv X:/Fhvih/Orfsb1/ZkkWzgz/Ilznrmt/QvgYizrmh/KbXszinXV7974.7/koftrmh/kbgslm-xv/svokvih/kbxszin/_qy_kbgvhg_ifmmvi.kb --gzitvg gvhgh/zkr/gvhg_fhvi.kb::gvhg_fhvi_oruvxbxov &#10;Gvhgrmt hgzigvw zg 82:76 ...&#10;Ozfmxsrmt kbgvhg drgs zitfnvmgh gvhgh/zkr/gvhg_fhvi.kb::gvhg_fhvi_oruvxbxov --ml-svzwvi --ml-hfnnzib -j rm W:\kilqvxgh\GvhgKrolg&#10;&#10;============================= gvhg hvhhrlm hgzigh =============================&#10;xloovxgrmt ... xloovxgvw 8 rgvn&#10;&#10;gvhgh/zkr/gvhg_fhvi.kb::gvhg_fhvi_oruvxbxov &#10;&#10;========================= 8 dzimrmt, 8 viili rm 9.44h =========================&#10;VIILI                        [899%]&#10;gvhg hvgfk uzrovw&#10;ivjfvhg = &lt;HfyIvjfvhg 'zfgl_ivgib' uli &lt;Ufmxgrlm gvhg_fhvi_oruvxbxov&gt;&gt;&#10;&#10;    @kbgvhg.urcgfiv(zfglfhv=Gifv)&#10;    wvu zfgl_ivgib(ivjfvhg):&#10;        &quot;&quot;&quot;自动重试失败用例&quot;&quot;&quot;&#10;&gt;       ru ivjfvhg.mlwv.ivk_xzoo.uzrovw:&#10;           ^^^^^^^^^^^^^^^^^^^^^&#10;V       ZggiryfgvViili: 'Ufmxgrlm' lyqvxg szh ml zggiryfgv 'ivk_xzoo'&#10;&#10;gvhgh\xlmugvhg.kb:89: ZggiryfgvViili" />
+                <option name="rating" value="UNRATED" />
+                <option name="status" value="SUCCESS" />
+              </Turn>
+            </list>
+          </option>
+          <option name="updateTime" value="1754472209330" />
+        </Conversation>
+        <Conversation>
           <option name="createTime" value="1754383198870" />
           <option name="id" value="3a2458744ae9479695d59b1b3f3e7d34" />
           <option name="title" value="D:\projects\TestPilot\.venv\Scripts\python.exe &quot;D:" />

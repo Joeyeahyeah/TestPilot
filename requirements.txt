@@ -1,4 +1,4 @@
-selenium~=4.34.2
+# 测试框架核心运行依赖
+
 requests~=2.32.4
-pytest~=8.4.1
-Faker~=37.5.3
+selenium~=4.34.2
