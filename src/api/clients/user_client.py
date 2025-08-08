@@ -1,6 +1,9 @@
-from ..api_client import APIClient
-from .auth_client import AuthClient  # 需要依赖认证
+from http.client import responses
+from typing import Dict, Any, Optional
 import requests
+import logging
+from src.api.api_client import APIClient
+
 
 """
 用户管理相关接口（增删改查）的业务封装
@@ -11,8 +14,10 @@ class UserClient(APIClient):
     # 用户管理端点
     USER_ENDPOINT = "users"
 
-    def __init__(self, base_url: str, auth_client: AuthClient):
+    def __init__(self, base_url: str, auth_client):
         super().__init__(base_url)
+        self.logger = logging.getLogger(__name__)
+        self.auth_client = auth_client
         # 复用已登录的auth_client的session
         self.session = auth_client.session
 
@@ -20,6 +25,8 @@ class UserClient(APIClient):
         return self.post(self.USER_ENDPOINT, json=user_data)
 
     def get_user(self, user_id: str) -> dict:
+        if not self.auth_client.is_authenticated():
+            raise Exception("用户未认证，请登录")
         return self.get(f"{self.USER_ENDPOINT}/{user_id}")
 
     def update_user(self, user_id: str, update_data: dict) -> dict:

@@ -6,10 +6,10 @@ from src.api import AuthClient
 专门测试认证接口
 """
 
-@pytest.fixture
-def auth_client() -> AuthClient:
-    """返回配置好基础URL的AuthClient"""
-    return AuthClient("https://api.example.com")
+# @pytest.fixture
+# def auth_client() -> AuthClient:
+#     """返回配置好基础URL的AuthClient"""
+#     return AuthClient("https://api.example.com")
 
 class TestAuth:
     # @pytest.mark.parametrize("username, password, expected_status", [

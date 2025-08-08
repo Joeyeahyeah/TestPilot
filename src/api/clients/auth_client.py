@@ -1,6 +1,6 @@
 from http.client import responses
 from typing import Dict, Any, TypedDict
-from ..api_client import APIClient
+from src.api.api_client import APIClient
 import requests
 import logging
 

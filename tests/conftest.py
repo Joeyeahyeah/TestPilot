@@ -1,3 +1,4 @@
+import path_config
 import os
 import sys
 import pytest
@@ -6,8 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 #导入API客户端相关类
-from src.api import APIClient
-from src.api.clients import AuthClient, UserClient
+from src.api import AuthClient, UserClient
 
 #首先添加获取测试报告的钩子函数
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)

@@ -1,9 +1,8 @@
 import time
-
 import pytest
 # from src.api.clients.auth_client import AuthClient
 from typing import Dict, Any, Optional
-from src.api.clients.user_client import UserClient
+from src.api import UserClient
 
 """
 专门测试用户管理接口（需要依赖登录态）
