@@ -25,7 +25,7 @@ class UserClient(APIClient):
         return self.post(self.USER_ENDPOINT, json=user_data)
 
     def get_user(self, user_id: str) -> dict:
-        if not self.auth_client.is_authenticated():
+        if not self.auth_client.check_health():
             raise Exception("用户未认证，请登录")
         return self.get(f"{self.USER_ENDPOINT}/{user_id}")
 

@@ -28,7 +28,7 @@ def get_relative_path(relative_path: str) -> str:
     """
     return os.path.abspath(os.path.join(PROJECT_ROOT, relative_path))
 
-def verify_path_exists(path: str) -> None:
+def verify_path_exists() -> None:
     """
     验证路径是否存在，如果不存在则抛出异常
     Args:
