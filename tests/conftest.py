@@ -6,6 +6,7 @@ import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+# from _pytest.runner import pytest_runtest_makereport
 #导入API客户端相关类
 from src.api import AuthClient, UserClient
 
@@ -18,21 +19,21 @@ def pytest_runtest_makereport(item, call):
     # 将结果存储在item的属性中，后续可以通过item.rep_call访问
     setattr(item, "rep_" + rep.when, rep)
 
-#修改自动重试fixture
-@pytest.fixture(autouse=True)
-def auto_retry(request):
-    """自动重试失败用例，最多重试2次"""
-    yield
-    # 检查测试是否失败
-    if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
-        max_retries = 2
-        current_retry = request.node.execution_count - 1
-        if current_retry < max_retries:
-            request.node.add_marker(pytest.mark.flaky(reruns=max_retries - current_retry))
-            time.sleep(1)
-    # if request.node.rep_call.failed:
-    #     time.sleep(1)
-    #     return request.node.rerun()
+# #修改自动重试fixture
+# @pytest.fixture(autouse=True)
+# def auto_retry(request):
+#     """自动重试失败用例，最多重试2次"""
+#     yield
+#     # 检查测试是否失败
+#     if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
+#         max_retries = 2
+#         current_retry = request.node.execution_count - 1
+#         if current_retry < max_retries:
+#             request.node.add_marker(pytest.mark.flaky(reruns=max_retries - current_retry))
+#             time.sleep(1)
+#     # if request.node.rep_call.failed:
+#     #     time.sleep(1)
+#     #     return request.node.rerun()
 @pytest.fixture
 def smart_wait(browser):
     """提供智能等待功能，用于页面元素"""

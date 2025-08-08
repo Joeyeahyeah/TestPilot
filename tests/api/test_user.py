@@ -1,13 +1,109 @@
-import time
+# import time
 import pytest
 # from src.api.clients.auth_client import AuthClient
-from typing import Dict, Any, Optional
-from src.api import UserClient
+# from typing import Dict, Any, Optional
+from src.api import UserClient, AuthClient
+# 替换手动断言为封装的工具函数
+from src.utils.api_assert import assert_status_code, assert_field_exists
 
 """
 专门测试用户管理接口（需要依赖登录态）
 """
 
+# ----------------------------- Reqres ---------------------------------
+# 测试目标API（使用ReqRes公开测试API）
+BASE_URL = "https://reqres.in/api"
+
+
+def test_user_lifecycle(user_client: UserClient, test_user_data: dict):
+    # 1. 初始化认证客户端，登录
+    auth_client = AuthClient(BASE_URL)
+    login_response = auth_client.login("eve.holt@reqres.in", "cityslicka")
+    assert_status_code(login_response, 200)
+    assert_field_exists(login_response, "token")
+
+    # 2. 初始化用户客户端，复用登录态
+    user_client = UserClient(BASE_URL, auth_client)
+
+    # 3. 测试创建用户
+    create_data = {"name": "Test User", "job": "Tester"}
+    create_response = user_client.create_user(create_data)
+    assert_status_code(create_response, 201)
+    assert_field_exists(create_response, "id")
+    assert create_response["data"]["name"] == create_data["name"]
+    assert create_response["data"]["job"] == create_data["job"]
+
+    # 4. 测试查询用户
+    get_response = user_client.get_user("2")
+    assert_status_code(get_response, 200)
+    assert get_response["data"]["email"].endswith("@reqres.in")
+
+    # 5. 测试更新用户
+    update_data = {"name": "Updated Name", "job": "Updated Job"}
+    update_response = user_client.update_user("2", update_data)
+    assert_status_code(update_response, 200)
+    assert update_response["data"]["name"] == update_data["name"]
+    assert update_response["data"]["job"] == update_data["job"]
+
+    # 6. 测试删除用户
+    delete_response = user_client.delete_user("2")
+    assert_status_code(delete_response, 204)
+
+
+@pytest.fixture
+def unauthorized_user_client():
+    # 未登录态的客户端
+    auth_client = AuthClient(BASE_URL)
+    return UserClient(BASE_URL, auth_client)
+
+
+@pytest.fixture
+def authed_user_client():
+    # 已登录态的客户端
+    auth_client = AuthClient(BASE_URL)
+    login_response = auth_client.login("eve.holt@reqres.in", "cityslicka")
+    assert_status_code(login_response, 200), "登录失败"
+    return UserClient(BASE_URL, auth_client)
+
+
+# 测试未登录态, 安全性测试
+def test_unauthorized_access(unauthorized_user_client):
+    response = unauthorized_user_client.get_user("2")
+    assert_status_code(response, 401)
+    # auth_client = AuthClient(BASE_URL) # 未登录态
+    # user_client = UserClient(BASE_URL, auth_client)
+    #
+    # get_response = user_client.get_user("2")
+    # assert_status_code(get_response, 401) # 未登录，返回401
+
+
+# 测试错误数据, 边界测试
+def test_get_nonexistent_user(authed_user_client):
+    response = authed_user_client.get_user("999999")
+    assert_status_code(response, 404)
+    assert response["error"] is not None, "错误响应缺少错误信息"
+
+
+@pytest.mark.parametrize("bad_data", [
+    {},  # 空数据
+    {"invalid_field": "value"},  # 无效字段
+    {"name": "", "job": ""},  # 空值
+])
+# 测试无效数据，数据校验测试
+def test_create_invalid_user(unauthorized_user_client, bad_data):
+    response = unauthorized_user_client().create_user(bad_data)
+    assert_status_code(response, 201)  # 修正：Reqres对任何POST /users都返回201
+    assert_field_exists(response["data"], "id")
+    assert_field_exists(response["data"], "createdAt")
+    # assert "id" in response["data"]
+    # assert "createdAt" in response["data"]
+    # # 修正：Reqres对任何POST /users都返回201
+    # assert response["status_code"] == 201
+    # # 可选：验证返回数据包含默认字段（如id、createdAt）
+    # assert "id" in response["data"]
+    # assert "createdAt" in response["data"]
+
+# ----------------------------- origin ---------------------------------
 # @pytest.fixture
 # def user_client(auth_client: AuthClient) -> UserClient:
 #     # 先确保登录
@@ -125,70 +221,3 @@ from src.api import UserClient
 #     })
 #     assert response["status_code"] == expected_status, \
 #         f"角色为{user_role}时，预期状态码{expected_status}，实际{response['status_code']}"
-
-# ----------------------------- Reqres ---------------------------------
-def test_user_lifecycle(user_client: UserClient, test_user_data: dict):
-    # 1. 创建用户
-    create_response = user_client.create_user(test_user_data)
-    assert create_response["status_code"] == 201
-
-    # Reqres返回创建的用户数据，但没有持久化存储
-    created_data = create_response["data"]
-    assert created_data["name"] == test_user_data["name"]
-    assert created_data["job"] == test_user_data["job"]
-    # user_id = created_data["id"]
-    assert "id" in created_data
-
-    # 2. 模拟更新用户
-    user_id = created_data["id"]
-    update_data = {"name": "Updated Name", "job": "Updated Job"}
-    update_response = user_client.update_user(user_id, update_data)
-    assert update_response["status_code"] == 200
-    assert update_response["data"]["name"] == update_data["name"]
-    assert update_response["data"]["job"] == update_data["job"]
-
-def test_create_user(user_client: UserClient):
-    """测试创建用户（模拟）"""
-    test_data = {
-        "name": "Test User",
-        "job": "Tester"
-    }
-    response = user_client.create_user(test_data)
-    assert response["status_code"] == 201
-    assert response["data"]["name"] == test_data["name"]
-
-def test_get_user(user_client: UserClient):
-    # Reqres预定义用户ID
-    response = user_client.get_user("2")
-
-    # print(f"完整响应数据: {response}")  # 调试用
-    # assert response["status_code"] == 200
-    # assert "data" in response
-    # assert response["data"]["id"] == 2
-    # assert "email" in response["data"]
-
-    assert response["status_code"] == 200
-    assert "data" in response, f"响应中缺少data字段: {response}"
-    assert "data" in response["data"], f"外层data中缺少内层data字段: {response['data']}"
-    assert "id" in response["data"]["data"], f"内层data中缺少id字段: {response['data']['data']}"
-    assert response["data"]["data"]["id"] == 2
-
-
-def test_get_nonexistent_user(user_client: UserClient):
-    response = user_client.get_user("999")
-    assert response["status_code"] == 404
-
-
-@pytest.mark.parametrize("bad_data", [
-    {},  # 空数据
-    {"invalid_field": "value"},  # 无效字段
-    {"name": "", "job": ""},  # 空值
-])
-def test_create_invalid_user(user_client: UserClient, bad_data: dict):
-    response = user_client.create_user(bad_data)
-    # 修正：Reqres对任何POST /users都返回201
-    assert response["status_code"] == 201
-    # 可选：验证返回数据包含默认字段（如id、createdAt）
-    assert "id" in response["data"]
-    assert "createdAt" in response["data"]
-# ----------------------------- Reqres ---------------------------------
